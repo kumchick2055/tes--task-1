@@ -8,6 +8,7 @@ import { ref } from 'vue';
 import { useUsersStore } from '@/stores/users';
 import type { User } from '@/db';
 import { reactive } from 'vue';
+import { ErrorCodes } from 'vue';
 
 const typeEntryOptions = ref([
   {name: 'Локальная', val: TypeEntry.Local},
@@ -17,40 +18,59 @@ const typeEntryOptions = ref([
 
 const usersStore = useUsersStore()
 const selectedItem = ref<User|null>(null)
-const labelsErrors = reactive<Record<number,boolean>>({});
+// Хранение значений меток, для последующей записи
+const labelsErrors = reactive<Record<number,Record<string,any>>>({});
 
-
-const labelInput = ref('');
 
 const onFocusItem = async (item: User) => {
   selectedItem.value = item
 }
 
 const onBlurItem = async (item: User) => {
-  // if(selectedItem.value !== null){
+  const errors = []
 
-  //   const errors = []
+  // Если есть ошибка в метках, пропускаем
+  if(labelsErrors[item.id]?.error){
+    errors.push('labels')
+  }
 
-  //   // if()
+  if(errors.length > 0){
+    console.log(errors)
+  } else {
 
-  //   await usersStore.updateUser(item)
-  //   selectedItem.value = null;
-  // }
+    if(labelsErrors[item.id]?.texts){
+      item.label = labelsErrors[item.id]?.texts
+    }
+
+    await usersStore.updateUser(item)
+    selectedItem.value = null;
+  }
+
+
 }
 
 const onChangeText = async (event: any, item: User) => {
-  // console.log(event, item)
   const texts: string[] = event.split(';')
+
   for(let i of texts){
     if(i.length >= 50){
-      labelsErrors[item.id] = true
+      labelsErrors[item.id] = {error: true}
       break;
     } else {
-      labelsErrors[item.id] = false
+      labelsErrors[item.id] = {error: false}
     }
   }
-  
-  console.log(texts)
+
+  // Если ошибок нету, ставим список
+  if(labelsErrors[item.id]?.error === false){
+    const a = []
+    for(let i of texts){
+      a.push({text: i.trim()})
+    }
+    labelsErrors[item.id].texts = a;
+  }
+
+
 }
 
 const onChangeSelect = async (item: User) => {
@@ -90,15 +110,19 @@ const onChangeSelect = async (item: User) => {
   :key="item.id" 
   class="mt-4 grid grid-cols-[1fr_1fr_1fr_1fr_32px] gap-4">
     <div>
+      <!-- :onblur="onBlurItem(item)" -->
+       
       <InputText 
-      :onfocus="onFocusItem(item)"
-      :onblur="onBlurItem(item)"
+      v-on:focus="onFocusItem(item)"
+      v-on:blur="onBlurItem(item)"
+
       v-on:value-change="onChangeText($event, item)"
       :model-value="item.label.map(n => n.text).join('; ')" 
-      :invalid="labelsErrors[item.id] === true"
+      :invalid="labelsErrors[item.id]?.error === true"
       fluid/>
+
       <Message
-      v-if="labelsErrors[item.id] === true"  
+      v-if="labelsErrors[item.id]?.error === true"  
       severity="error" 
       size="small" 
       variant="simple">Длина метки больше 50 символов!</Message>
@@ -117,7 +141,6 @@ const onChangeSelect = async (item: User) => {
     <div v-if="item.typeEntry === TypeEntry.Local">
         <InputText 
         :onfocus="onFocusItem(item)"
-        :onblur="onBlurItem(item)"
 
         :model-value="item.login" 
         :maxlength="100" 
@@ -127,7 +150,7 @@ const onChangeSelect = async (item: User) => {
     <div v-if="item.typeEntry === TypeEntry.Local">
       <Password
       :onfocus="onFocusItem(item)"
-      :onblur="onBlurItem(item)"
+      
 
       :model-value="item.password" 
       :toggle-mask="true" 
@@ -139,7 +162,7 @@ const onChangeSelect = async (item: User) => {
     <div v-if="item.typeEntry === TypeEntry.LDAP" class="col-span-2">
         <InputText 
         :onfocus="onFocusItem(item)"
-        :onblur="onBlurItem(item)"
+
 
         :model-value="item.login" 
         :maxlength="100" 
