@@ -33,6 +33,14 @@ const onBlurItem = async (item: User) => {
   if(labelsErrors[item.id]?.error){
     errors.push('labels')
   }
+  if(item.typeEntry === TypeEntry.Local){
+    if(item.password?.length === 0){
+      errors.push('password')
+    }
+  }
+  if(item.login.length === 0){
+    errors.push('login')
+  }
 
   if(errors.length > 0){
     console.log(errors)
@@ -81,7 +89,7 @@ const onChangeSelect = async (item: User) => {
     item.password = ''
   }
 
-  await usersStore.updateUser(item)
+  await onBlurItem(item)
 }
 
 
