@@ -26,6 +26,12 @@ export const useUsersStore = defineStore('defineStore', () => {
         usersList.value.push(data)
     }
 
+    const updateUser = async (item: User) => {
+        // fix DataCloneError
+        const cleanItem = JSON.parse(JSON.stringify(item));
+        await db.users.put(cleanItem)
+    }
+
     const getUsers = async () => {
         const data = await db.users.toArray()
         usersList.value = data
@@ -48,6 +54,7 @@ export const useUsersStore = defineStore('defineStore', () => {
 
         getUsers,
         deleteUser,
-        addUser
+        addUser,
+        updateUser
     }
 })

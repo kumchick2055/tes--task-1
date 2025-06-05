@@ -6,17 +6,37 @@ import Select from 'primevue/select';
 import {TypeEntry} from '@/stores/users'
 import { ref } from 'vue';
 import { useUsersStore } from '@/stores/users';
+import type { User } from '@/db';
 
 const typeEntryOptions = ref([
   {name: 'Локальная', val: TypeEntry.Local},
   {name: 'LDAP', val: TypeEntry.LDAP},
 ])
 
-const usersStore = useUsersStore()
 
-// const usersList = [
-  
-// ]
+const usersStore = useUsersStore()
+const selectedItem = ref<User|null>(null)
+
+const onFocusItem = async (item: User) => {
+  selectedItem.value = item
+}
+
+const onBlurItem = async (item: User) => {
+
+}
+
+const onChangeSelect = async (item: User) => {
+  if(item.typeEntry === TypeEntry.LDAP){
+    item.password = null
+  }
+  if(item.typeEntry === TypeEntry.Local){
+    item.password = ''
+  }
+
+  await usersStore.updateUser(item)
+}
+
+
 </script>
 
 <template>
@@ -34,7 +54,6 @@ const usersStore = useUsersStore()
     <div>
       Пароль
     </div>
-    
   </div>
 
   <!-- Список юзеров -->
@@ -43,26 +62,63 @@ const usersStore = useUsersStore()
   :key="item.id" 
   class="mt-4 grid grid-cols-[1fr_1fr_1fr_1fr_32px] gap-4">
     <div>
-      <InputText :model-value="item.label.join('; ')" :maxlength="50" fluid  />
+      <InputText 
+      :onfocus="onFocusItem(item)"
+      :onblur="onBlurItem(item)"
+
+      :model-value="item.label.join('; ')" 
+      :maxlength="50" 
+      fluid/>
     </div>
     <div>
-      <Select fluid option-label="name" option-value="val" :model-value="item.typeEntry" :options="typeEntryOptions" />
+      <Select 
+      option-label="name" 
+      option-value="val" 
+      @change="onChangeSelect(item)"
+      v-model="item.typeEntry" 
+      :options="typeEntryOptions" 
+      fluid 
+      />
     </div>
     
     <div v-if="item.typeEntry === TypeEntry.Local">
-        <InputText :model-value="item.login" fluid :maxlength="100" />
+        <InputText 
+        :onfocus="onFocusItem(item)"
+        :onblur="onBlurItem(item)"
+
+        :model-value="item.login" 
+        :maxlength="100" 
+        fluid 
+        />
     </div>
     <div v-if="item.typeEntry === TypeEntry.Local">
-      <Password :model-value="item.password" fluid :toggle-mask="true" :feedback="false" />
+      <Password
+      :onfocus="onFocusItem(item)"
+      :onblur="onBlurItem(item)"
+
+      :model-value="item.password" 
+      :toggle-mask="true" 
+      fluid 
+      :feedback="false" />
     </div>
     
     <!-- col-span для объединение ячеек -->
     <div v-if="item.typeEntry === TypeEntry.LDAP" class="col-span-2">
-        <InputText :model-value="item.login" fluid :maxlength="100" />
+        <InputText 
+        :onfocus="onFocusItem(item)"
+        :onblur="onBlurItem(item)"
+
+        :model-value="item.login" 
+        :maxlength="100" 
+        fluid 
+        />
     </div>
 
     <div>
-      <Button @click="usersStore.deleteUser(item.id)" icon="pi pi-trash" aria-label="Delete" />
+      <Button 
+      @click="usersStore.deleteUser(item.id)" 
+      icon="pi pi-trash" 
+      aria-label="Delete" />
     </div>
   </div>
 </template>
