@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { db, type User } from '@/db'
 
 export enum TypeEntry {
     Local,
@@ -7,7 +8,46 @@ export enum TypeEntry {
 }
 
 export const useUsersStore = defineStore('defineStore', () => {
-    return {
+    const usersList = ref<Array<User>>([
+        {id: 0, label: ['4', '5'], typeEntry: TypeEntry.LDAP, login: '123', password: '123'}
+    ])
 
+    const addUser = async () => {
+        let data = {
+            label: [''],
+            typeEntry: TypeEntry.Local,
+            login: '',
+            password: ''
+        } as User
+
+        const id = await db.users.add(data)
+        data.id = id
+
+        usersList.value.push(data)
+    }
+
+    const getUsers = async () => {
+        const data = await db.users.toArray()
+        usersList.value = data
+    }
+
+    const deleteUser = async (id: number) => {
+        await db.users.delete(id)
+
+        for(let i = 0; i < usersList.value.length; i++){
+            if(usersList.value[i].id === id){
+                usersList.value.splice(i, 1)
+                break
+            }
+        }
+    }
+
+    
+    return {
+        usersList,
+
+        getUsers,
+        deleteUser,
+        addUser
     }
 })

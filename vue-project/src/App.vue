@@ -3,6 +3,14 @@ import HelloWorld from './components/HelloWorld.vue'
 import UsersBoarder from './components/UsersBoarder.vue'
 import Button from "primevue/button"
 import Message from 'primevue/message';
+import { useUsersStore } from './stores/users';
+import { onMounted } from 'vue';
+
+const usersStore = useUsersStore()
+
+onMounted(async () => {
+  await usersStore.getUsers()
+})
 </script>
 
 <template>
@@ -16,7 +24,7 @@ import Message from 'primevue/message';
         Учётные записи
       </div>
       <div> 
-        <Button>+</Button>
+        <Button @click="usersStore.addUser">+</Button>
       </div>
     </div>
     <div class="mt-2">
