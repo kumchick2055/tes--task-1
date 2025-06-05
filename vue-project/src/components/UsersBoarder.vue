@@ -141,33 +141,50 @@ const onChangeSelect = async (item: User) => {
     <div v-if="item.typeEntry === TypeEntry.Local">
         <InputText 
         :onfocus="onFocusItem(item)"
-
-        :model-value="item.login" 
+        v-on:blur="onBlurItem(item)"
+        :invalid="item.login.length === 0"
+        v-model="item.login" 
         :maxlength="100" 
         fluid 
         />
+        <Message
+        v-if="item.login.length === 0"
+        severity="error" 
+        size="small" 
+        variant="simple">Логин не может быть пустым символов!</Message>
     </div>
     <div v-if="item.typeEntry === TypeEntry.Local">
       <Password
       :onfocus="onFocusItem(item)"
-      
+      v-on:blur="onBlurItem(item)"
+      :invalid="item.password?.length === 0"
 
-      :model-value="item.password" 
+      v-model="item.password" 
       :toggle-mask="true" 
       fluid 
       :feedback="false" />
+      <Message
+        v-if="item.password?.length === 0"
+        severity="error" 
+        size="small" 
+        variant="simple">Пароль не может быть пустым символов!</Message>
     </div>
     
     <!-- col-span для объединение ячеек -->
     <div v-if="item.typeEntry === TypeEntry.LDAP" class="col-span-2">
         <InputText 
         :onfocus="onFocusItem(item)"
+        v-on:blur="onBlurItem(item)"
 
-
-        :model-value="item.login" 
+        v-model="item.login" 
         :maxlength="100" 
         fluid 
         />
+        <Message
+        v-if="item.login.length === 0"
+        severity="error" 
+        size="small" 
+        variant="simple">Логин не может быть пустым символов!</Message>
     </div>
 
     <div>
