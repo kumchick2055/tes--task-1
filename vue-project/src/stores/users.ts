@@ -9,12 +9,13 @@ export enum TypeEntry {
 
 export const useUsersStore = defineStore('defineStore', () => {
     const usersList = ref<Array<User>>([
-        {id: 0, label: ['4', '5'], typeEntry: TypeEntry.LDAP, login: '123', password: '123'}
+        // {id: 0, label: ['4', '5'], typeEntry: TypeEntry.LDAP, login: '123', password: '123'}
     ])
 
     const addUser = async () => {
+        // @ts-ignore
         let data = {
-            label: [''],
+            label: [],
             typeEntry: TypeEntry.Local,
             login: '',
             password: ''

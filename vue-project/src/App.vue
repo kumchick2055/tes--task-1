@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+
 import UsersBoarder from './components/UsersBoarder.vue'
 import Button from "primevue/button"
 import Message from 'primevue/message';

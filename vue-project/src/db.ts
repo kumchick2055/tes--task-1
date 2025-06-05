@@ -1,10 +1,9 @@
 import Dexie, {type EntityTable} from "dexie";
 import type { TypeEntry } from "./stores/users";
-import type { EntityNameExpression } from "typescript";
 
 interface User {
     id: number,
-    label: Array<string>,
+    label: Record<string, string>[],
     typeEntry: TypeEntry,
     login: string,
     password: string | null

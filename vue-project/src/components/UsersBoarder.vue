@@ -7,6 +7,7 @@ import {TypeEntry} from '@/stores/users'
 import { ref } from 'vue';
 import { useUsersStore } from '@/stores/users';
 import type { User } from '@/db';
+import { reactive } from 'vue';
 
 const typeEntryOptions = ref([
   {name: 'Локальная', val: TypeEntry.Local},
@@ -16,13 +17,40 @@ const typeEntryOptions = ref([
 
 const usersStore = useUsersStore()
 const selectedItem = ref<User|null>(null)
+const labelsErrors = reactive<Record<number,boolean>>({});
+
+
+const labelInput = ref('');
 
 const onFocusItem = async (item: User) => {
   selectedItem.value = item
 }
 
 const onBlurItem = async (item: User) => {
+  // if(selectedItem.value !== null){
 
+  //   const errors = []
+
+  //   // if()
+
+  //   await usersStore.updateUser(item)
+  //   selectedItem.value = null;
+  // }
+}
+
+const onChangeText = async (event: any, item: User) => {
+  // console.log(event, item)
+  const texts: string[] = event.split(';')
+  for(let i of texts){
+    if(i.length >= 50){
+      labelsErrors[item.id] = true
+      break;
+    } else {
+      labelsErrors[item.id] = false
+    }
+  }
+  
+  console.log(texts)
 }
 
 const onChangeSelect = async (item: User) => {
@@ -65,10 +93,15 @@ const onChangeSelect = async (item: User) => {
       <InputText 
       :onfocus="onFocusItem(item)"
       :onblur="onBlurItem(item)"
-
-      :model-value="item.label.join('; ')" 
-      :maxlength="50" 
+      v-on:value-change="onChangeText($event, item)"
+      :model-value="item.label.map(n => n.text).join('; ')" 
+      :invalid="labelsErrors[item.id] === true"
       fluid/>
+      <Message
+      v-if="labelsErrors[item.id] === true"  
+      severity="error" 
+      size="small" 
+      variant="simple">Длина метки больше 50 символов!</Message>
     </div>
     <div>
       <Select 
