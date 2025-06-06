@@ -7,24 +7,26 @@ export enum TypeEntry {
     LDAP
 }
 
+type UserCreate = Omit<User, 'id'>;
+
 export const useUsersStore = defineStore('defineStore', () => {
     const usersList = ref<Array<User>>([
         // {id: 0, label: ['4', '5'], typeEntry: TypeEntry.LDAP, login: '123', password: '123'}
     ])
 
     const addUser = async () => {
-        // @ts-ignore
-        let data = {
+        
+        let data: UserCreate = {
             label: [],
             typeEntry: TypeEntry.Local,
             login: '',
             password: ''
-        } as User
+        }
 
         const id = await db.users.add(data)
-        data.id = id
+        const user: User = {...data, id}
 
-        usersList.value.push(data)
+        usersList.value.push(user)
     }
 
     const updateUser = async (item: User) => {
